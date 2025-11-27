@@ -11,6 +11,5 @@ conda create -n dash_env python=3.14
 Installation des packages 
 
 ```
-pip install dash
-pip install pandas
+pip install -r requirements.txt
 ```

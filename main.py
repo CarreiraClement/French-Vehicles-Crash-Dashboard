@@ -1,9 +1,8 @@
 from dash import Dash, html, dcc, Input, Output, callback
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
-import json
-import numpy as np
+
+
 
 
 accidents = pd.read_csv('Data/2023/caract-2023.csv', sep=';', low_memory=False)
@@ -31,7 +30,6 @@ data_complete['grav_lib'] = data_complete['grav'].map(grav_dict).fillna('Non ren
 
 app = Dash(__name__)
 
-# Layout du dashboard
 app.layout = html.Div([
     html.H1(
         "Dashboard des Accidents de la Route en France (2023)",
@@ -43,7 +41,6 @@ app.layout = html.Div([
         }
     ),
     
-    # Statistiques globales
     html.Div([
         html.Div([
             html.H3(f"{len(accidents):,}", style={'margin': '0', 'fontSize': '2em', 'color': '#e74c3c'}),

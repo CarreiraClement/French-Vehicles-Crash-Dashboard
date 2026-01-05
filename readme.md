@@ -8,6 +8,9 @@ Utilisation env conda : python 3.14
 conda create -n dash_env python=3.14
 ```
 
+```
+conda activate dash_env
+```
 Installation des packages 
 
 ```

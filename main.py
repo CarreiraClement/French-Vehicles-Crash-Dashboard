@@ -11,12 +11,15 @@ vehicules = pd.read_csv('Data/2023/vehicules-2023.csv', sep=';', low_memory=Fals
 lieux = pd.read_csv('Data/2023/lieux-2023.csv', sep=';', low_memory=False)
 accidents_dep = pd.read_csv('Data/2023/data-store/accidents_par_departement.csv', sep=';', low_memory=False)
 accidents_pop = pd.read_csv('Data/2023/data-store/accidents_population_ratio.csv', sep=';', low_memory=False)
+departements = pd.read_csv('Data/population/donnees_departements.csv', sep=';', low_memory=False)
+
 
 
 data_complete = accidents.merge(usagers, on='Num_Acc', how='left')
+data_complete = data_complete.merge(accidents, on='Num_Acc', how='left', suffixes=('', '_acc'))
 data_complete = data_complete.merge(vehicules, on=['Num_Acc', 'id_vehicule'], how='left', suffixes=('', '_veh'))
 data_complete = data_complete.merge(lieux, on='Num_Acc', how='left', suffixes=('', '_lieu'))
-
+data_complete = data_complete.merge(departements, left_on='dep', right_on="DEP", how='left', suffixes=('', '_dep_info'))
 
 grav_dict = {
     1: 'Indemne',
@@ -97,8 +100,8 @@ app.layout = html.Div([
             html.Label("Filtre par département:", style={'fontWeight': 'bold', 'marginRight': '10px'}),
             dcc.Dropdown(
                 id='departement-filter',
-                options=[{'label': f"Département {dep}", 'value': dep} 
-                        for dep in sorted(accidents['dep'].unique())] + [{'label': 'Tous', 'value': 'all'}],
+                options=[{'label': f"{dep}", 'value': dep}
+                        for dep in sorted(departements['Département'].unique())] + [{'label': 'Tous', 'value': 'all'}],
                 value='all',
                 style={'width': '200px'}
             )
@@ -134,7 +137,7 @@ app.layout = html.Div([
 def update_gravite(dep_filter):
     dc = data_complete.copy()
     if dep_filter != 'all':
-        dc = dc[dc['dep'] == dep_filter]
+        dc = dc[dc['Département'] == dep_filter]
     
     grav_counts = dc['grav_lib'].value_counts().reset_index()
     grav_counts.columns = ['Gravité', 'Nombre']

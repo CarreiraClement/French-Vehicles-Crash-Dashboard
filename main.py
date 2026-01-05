@@ -1,11 +1,19 @@
 from dash import Dash, html, dcc, Input, Output, callback
 import pandas as pd
 import plotly.express as px
+import os
 
 from Map.map import generate_map_accidents_html, generate_map_ratio_html
 
+def load_accidents_data(year):
+    file_path = f'Data/{year}/caracteristiques-{year}.csv'
+    
+    if os.path.exists(file_path):
+        return pd.read_csv(file_path, sep=';', low_memory=False)
+    
+    return pd.DataFrame()
 
-accidents = pd.read_csv('Data/2023/caract-2023.csv', sep=';', low_memory=False)
+accidents = pd.read_csv('Data/2023/caracteristiques-2023.csv', sep=';', low_memory=False)
 usagers = pd.read_csv('Data/2023/usagers-2023.csv', sep=';', low_memory=False)
 vehicules = pd.read_csv('Data/2023/vehicules-2023.csv', sep=';', low_memory=False)
 lieux = pd.read_csv('Data/2023/lieux-2023.csv', sep=';', low_memory=False)
@@ -32,7 +40,7 @@ app = Dash(__name__)
 
 app.layout = html.Div([
     html.H1(
-        "Dashboard des Accidents de la Route en France (2023)",
+        "Dashboard des Accidents de la Route en France",
         style={
             'textAlign': 'center',
             'color': '#2c3e50',
@@ -42,8 +50,24 @@ app.layout = html.Div([
     ),
     
     html.Div([
+        html.Label("Année:", style={'fontWeight': 'bold', 'marginRight': '10px'}),
+        dcc.Dropdown(
+            id='year-selector',
+            options=[
+                {'label': 'Tous', 'value': 'total'},
+                {'label': '2020', 'value': 2020},
+                {'label': '2021', 'value': 2021},
+                {'label': '2022', 'value': 2022},
+                {'label': '2023', 'value': 2023}
+            ],
+            value='total',
+            style={'width': '150px', 'display': 'inline-block'}
+        )
+    ], style={'textAlign': 'center', 'marginBottom': '20px'}),
+    
+    html.Div([
         html.Div([
-            html.H3(f"{len(accidents):,}", style={'margin': '0', 'fontSize': '2em', 'color': '#e74c3c'}),
+            html.H3(id='accidents-totaux', style={'margin': '0', 'fontSize': '2em', 'color': '#e74c3c'}),
             html.P("Accidents totaux", style={'margin': '5px 0', 'color': '#7f8c8d'})
         ], style={
             'width': '24%',
@@ -137,6 +161,19 @@ app.layout = html.Div([
         ], style={'width': '48%', 'display': 'inline-block', 'marginRight': '2%'}),
     ], style={'marginBottom': '20px'})
 ])
+
+@callback(
+    Output('accidents-totaux', 'children'),
+    Input('year-selector', 'value')
+)
+def update_accidents_totaux(year):
+    """Met à jour le nombre d'accidents totaux selon l'année sélectionnée"""
+    if year == 'total':
+        accidents_data = pd.concat([load_accidents_data(annee) for annee in [2020, 2021, 2022, 2023]])
+        return f"{len(accidents_data):,}"
+    else:
+        accidents_data = load_accidents_data(year)
+        return f"{len(accidents_data):,}"
 
 @callback(
     Output('graph-gravite', 'figure'),

@@ -2,7 +2,7 @@ from dash import Dash, html, dcc, Input, Output, callback
 import pandas as pd
 import plotly.express as px
 
-from map.map import generate_map_accidents_html, generate_map_ratio_html
+from Map.map import generate_map_accidents_html, generate_map_ratio_html
 
 
 accidents = pd.read_csv('Data/2023/caract-2023.csv', sep=';', low_memory=False)

@@ -137,8 +137,13 @@ app.layout = html.Div([
     html.Div([
         html.Div([
             dcc.Graph(id='graph-gravite')
-        ], style={'width': '48%', 'display': 'inline-block', 'marginRight': '2%'}),
-    ], style={'marginBottom': '20px'})
+        ], style={'width': '100%', 'display': 'inline-block', 'marginRight': '2%'}),
+    ], style={'marginBottom': '20px'}),
+
+    html.Div([
+        dcc.Graph(id='histo-nombre-accidents')],
+        style={'width': '48%', 'display': 'inline-block'}
+    )
 ])
 
 @callback(
@@ -161,6 +166,26 @@ def update_gravite(dep_filter):
         color_discrete_sequence=px.colors.sequential.Reds_r
     )
     fig.update_traces(textposition='inside', textinfo='percent+label')
+    fig.update_layout(height=400)
+    return fig
+
+@callback(
+    Output('histo-nombre-accidents', 'figure'),
+    Input('departement-filter', 'value')
+)
+def update_nombre_accidents(dep_filter):
+    dc = accidents_dep.copy()
+    if dep_filter != 'all':
+        dc = dc[dc['dep'] == dep_filter]
+
+    fig = px.bar(
+        dc,
+        x='dep',
+        y='nb_accidents',
+        title='Nombre d\'accidents par département',
+        color='nb_accidents',
+        color_continuous_scale=px.colors.sequential.Blues
+    )
     fig.update_layout(height=400)
     return fig
 

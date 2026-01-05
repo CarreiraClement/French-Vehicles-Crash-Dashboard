@@ -2,7 +2,7 @@ from dash import Dash, html, dcc, Input, Output, callback
 import pandas as pd
 import plotly.express as px
 
-
+from map.map import generate_map_accidents_html, generate_map_ratio_html
 
 
 accidents = pd.read_csv('Data/2023/caract-2023.csv', sep=';', low_memory=False)
@@ -106,12 +106,12 @@ app.layout = html.Div([
         html.Div([
             html.Label("Type de visualisation:", style={'fontWeight': 'bold', 'marginRight': '10px'}),
             dcc.RadioItems(
-                id='map-type',
+                id='type-visualisation',
                 options=[
-                    {'label': 'Nombre d\'accidents', 'value': 'nb'},
-                    {'label': 'Ratio accidents/population', 'value': 'ratio'}
+                    {'label': 'Nombre d\'accidents', 'value': 'nombre_accidents'},
+                    {'label': 'Ratio accidents/population', 'value': 'ratio_accidents_population'}
                 ],
-                value='nb',
+                value='nombre_accidents',
                 inline=True,
                 style={'display': 'inline-block'}
             )
@@ -119,12 +119,23 @@ app.layout = html.Div([
     ], style={'padding': '20px', 'backgroundColor': '#f8f9fa', 'borderRadius': '10px', 'marginBottom': '20px'}),
     
     html.Div([
+        html.Iframe(
+            id='map-accidents-par-departement',
+            srcDoc='',
+            style={
+                'width': '100%',
+                'height': '600px',
+                'border': 'none',
+                'borderRadius': '10px'
+            }
+        )
+    ], style={'width': '90%', 'margin': '0 auto', 'marginBottom': '30px'}),
+    
+    html.Div([
         html.Div([
-            html.Div([
-                dcc.Graph(id='graph-gravite')
-            ], style={'width': '48%', 'display': 'inline-block', 'marginRight': '2%'}),
-        ], style={'marginBottom': '20px'}),
-    ])
+            dcc.Graph(id='graph-gravite')
+        ], style={'width': '48%', 'display': 'inline-block', 'marginRight': '2%'}),
+    ], style={'marginBottom': '20px'})
 ])
 
 @callback(
@@ -149,6 +160,17 @@ def update_gravite(dep_filter):
     fig.update_traces(textposition='inside', textinfo='percent+label')
     fig.update_layout(height=400)
     return fig
+
+@callback(
+    Output('map-accidents-par-departement', 'srcDoc'),
+    Input('type-visualisation', 'value'),
+    prevent_initial_call=False
+)
+def update_map_accidents_par_departement(type_visualisation):
+    if type_visualisation == 'nombre_accidents':
+        return generate_map_accidents_html()
+    else:
+        return generate_map_ratio_html()
 
 if __name__ == '__main__':
     app.run(debug=True)

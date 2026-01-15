@@ -9,16 +9,17 @@ import os
 
 from data_utils import load_accidents_all_years
 
-coords = (48.8398094, 2.5840685)
+coords = (43.25089, 2.43844)
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 geo_json_data = os.path.join(base_dir, 'Data/geojson/departements.geojson')
+
+tiles = "https://{s}.tile.jawg.io/jawg-light/{z}/{x}/{y}{r}.png?access-token=WxkdBMM2vf10JFvs7ISABaUnFIMB1eszkdkVnEGeLYiViNpEJsFOakojFkygRWeJ"
+attr = '&copy; <a href="https://www.jawg.io">Jawg</a> &amp; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 
 
 def generate_map_accidents_html(year=None):
     """
-    Génère la carte du nombre d'accidents par département.
-    - year = None ou 'total' → agrège 2020–2023
-    - year = 2020/2021/2022/2023 → carte pour une seule année
+    Génère la carte du nombre d'accidents par département
     """
     if year is None or year == "total":
         accidents_data = load_accidents_all_years()
@@ -29,7 +30,12 @@ def generate_map_accidents_html(year=None):
         )
 
     if accidents_data.empty:
-        map_obj = folium.Map(location=coords, tiles='OpenStreetMap', zoom_start=6)
+        map_obj = folium.Map(
+            location=coords,
+            tiles=tiles,
+            attr=attr,
+            zoom_start=6
+        )
         return map_obj._repr_html_()
 
     accident_by_department = accidents_data.groupby('dep').size().reset_index(name='nb_accidents')
@@ -41,17 +47,22 @@ def generate_map_accidents_html(year=None):
 
     accident_by_department['nb_accidents_log'] = np.log1p(accident_by_department['nb_accidents'])
 
-    map_obj = folium.Map(location=coords, tiles='OpenStreetMap', zoom_start=6)
+    map_obj = folium.Map(
+        location=coords,
+        tiles=JAWG_TILES,
+        attr=JAWG_ATTR,
+        zoom_start=5.4
+    )
 
     folium.Choropleth(
         geo_data=geo_json_data,
         data=accident_by_department,
         columns=["dep", "nb_accidents_log"],
         key_on="feature.properties.code",
-        fill_color='YlOrRd',
-        fill_opacity=0.8,
+        fill_color='YlOrBr',
+        fill_opacity=0.85,
         legend_name="Nombre d'accidents par département",
-        line_weight=2,
+        line_weight=1.5,
         bins=8
     ).add_to(map_obj)
 
@@ -68,10 +79,10 @@ def generate_map_accidents_html(year=None):
             'color': 'transparent'
         },
         highlight_function=lambda feature: {
-            'fillColor': 'green',
-            'fillOpacity': 0.5,
+            'fillColor': '#922d50',
+            'fillOpacity': 0.6,
             'weight': 2,
-            'color': 'green'
+            'color': '#3c1b43'
         },
         tooltip=folium.GeoJsonTooltip(
             fields=['nom', 'code', 'nb_accidents'],
@@ -88,8 +99,6 @@ def generate_map_accidents_html(year=None):
 def generate_map_ratio_html(year=None):
     """
     Génère la carte du ratio accidents/population par département.
-    - year = None ou 'total' → agrège 2020–2023
-    - year = 2020/2021/2022/2023 → carte pour une seule année
     """
     if year is None or str(year).lower() == "total":
         accidents_data = load_accidents_all_years()
@@ -100,7 +109,12 @@ def generate_map_ratio_html(year=None):
         )
 
     if accidents_data.empty:
-        map_accidents_ratio = folium.Map(location=coords, tiles='OpenStreetMap', zoom_start=6)
+        map_accidents_ratio = folium.Map(
+            location=coords,
+            tiles=JAWG_TILES,
+            attr=JAWG_ATTR,
+            zoom_start=5.4
+        )
         return map_accidents_ratio._repr_html_()
 
     accident_by_department = accidents_data.groupby('dep').size().reset_index(name='nb_accidents')
@@ -133,17 +147,22 @@ def generate_map_ratio_html(year=None):
 
     geojson2 = copy.deepcopy(geojson)
 
-    map_accidents_ratio = folium.Map(location=coords, tiles='OpenStreetMap', zoom_start=6)
+    map_accidents_ratio = folium.Map(
+        location=coords,
+        tiles=tiles,
+        attr=attr,
+        zoom_start=5.4
+    )
 
     folium.Choropleth(
         geo_data=geo_json_data,
         data=accidents_population,
         columns=["dep", "ratio_log"],
         key_on="feature.properties.code",
-        fill_color='YlOrRd',
-        fill_opacity=0.8,
+        fill_color='YlOrBr',
+        fill_opacity=0.85,
         legend_name='Ratio accidents/population (pour 1000 hab, échelle log)',
-        line_weight=2,
+        line_weight=1.5,
         bins=8
     ).add_to(map_accidents_ratio)
 
@@ -169,10 +188,10 @@ def generate_map_ratio_html(year=None):
             'color': 'transparent'
         },
         highlight_function=lambda feature: {
-            'fillColor': 'blue',
-            'fillOpacity': 0.5,
+            'fillColor': '#922d50',
+            'fillOpacity': 0.6,
             'weight': 2,
-            'color': 'blue'
+            'color': '#3c1b43'
         },
         tooltip=folium.GeoJsonTooltip(
             fields=['nom', 'code', 'ratio_accidents', 'population', 'nb_accidents'],

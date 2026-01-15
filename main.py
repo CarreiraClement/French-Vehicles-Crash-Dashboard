@@ -4,13 +4,15 @@ import plotly.express as px
 import os
 
 from Map.map import generate_map_accidents_html, generate_map_ratio_html
+from data_utils import load_accidents_all_years
+
 
 def load_accidents_data(year):
     file_path = f'Data/{year}/caracteristiques-{year}.csv'
-    
+
     if os.path.exists(file_path):
         return pd.read_csv(file_path, sep=';', low_memory=False)
-    
+
     return pd.DataFrame()
 
 accidents = pd.read_csv('Data/2023/caracteristiques-2023.csv', sep=';', low_memory=False)
@@ -169,7 +171,7 @@ app.layout = html.Div([
 def update_accidents_totaux(year):
     """Met à jour le nombre d'accidents totaux selon l'année sélectionnée"""
     if year == 'total':
-        accidents_data = pd.concat([load_accidents_data(annee) for annee in [2020, 2021, 2022, 2023]])
+        accidents_data = load_accidents_all_years()
         return f"{len(accidents_data):,}"
     else:
         accidents_data = load_accidents_data(year)
@@ -207,9 +209,9 @@ def update_gravite(dep_filter):
 def update_map_accidents_par_departement(type_visualisation, year):
     if year == 'total':
         if type_visualisation == 'nombre_accidents':
-            return generate_map_accidents_html()
+            return generate_map_accidents_html('total')
         else:
-            return generate_map_ratio_html()
+            return generate_map_ratio_html('total')
     else:
         if type_visualisation == 'nombre_accidents':
             return generate_map_accidents_html(year)

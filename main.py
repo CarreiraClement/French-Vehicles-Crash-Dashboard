@@ -20,6 +20,7 @@ data_complete = data_complete.merge(accidents, on='Num_Acc', how='left', suffixe
 data_complete = data_complete.merge(vehicules, on=['Num_Acc', 'id_vehicule'], how='left', suffixes=('', '_veh'))
 data_complete = data_complete.merge(lieux, on='Num_Acc', how='left', suffixes=('', '_lieu'))
 data_complete = data_complete.merge(departements, left_on='dep', right_on="DEP", how='left', suffixes=('', '_dep_info'))
+data_complete = data_complete.merge(usagers, on='Num_Acc', how='left', suffixes=('', '_usager'))
 
 grav_dict = {
     1: 'Indemne',
@@ -169,21 +170,34 @@ def update_gravite(dep_filter):
     fig.update_layout(height=400)
     return fig
 
+def create_age_staircase(data):
+    bins = list(range(0, 101, 10))
+    labels = [f"{i}-{i+9}" for i in bins[:-1]]
+
+    age_counts = data.groupby("an_nais").size().reset_index(name='Nombre d\'accidents')
+    age_counts.columns = ['Âge', 'Nombre d\'accidents']
+    age_counts['Âge'] = age_counts['Âge'].apply(lambda x: 2026 - x if pd.notnull(x) else x)
+    age_counts['Âge'] = pd.cut(age_counts['Âge'], bins=bins, labels=labels, right=False)
+    age_counts = age_counts.groupby('Âge')['Nombre d\'accidents'].sum().reset_index()
+    return age_counts
+
 @callback(
     Output('histo-nombre-accidents', 'figure'),
     Input('departement-filter', 'value')
 )
 def update_nombre_accidents(dep_filter):
-    dc = accidents_dep.copy()
+    dc = data_complete.copy()
     if dep_filter != 'all':
         dc = dc[dc['dep'] == dep_filter]
+    dc = create_age_staircase(dc)
+    print(dc)
 
     fig = px.bar(
         dc,
-        x='dep',
-        y='nb_accidents',
+        x='Âge',
+        y='Nombre d\'accidents',
         title='Nombre d\'accidents par département',
-        color='nb_accidents',
+        color='Nombre d\'accidents',
         color_continuous_scale=px.colors.sequential.Blues
     )
     fig.update_layout(height=400)

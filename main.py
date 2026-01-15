@@ -201,13 +201,20 @@ def update_gravite(dep_filter):
 @callback(
     Output('map-accidents-par-departement', 'srcDoc'),
     Input('type-visualisation', 'value'),
+    Input('year-selector', 'value'),
     prevent_initial_call=False
 )
-def update_map_accidents_par_departement(type_visualisation):
-    if type_visualisation == 'nombre_accidents':
-        return generate_map_accidents_html()
+def update_map_accidents_par_departement(type_visualisation, year):
+    if year == 'total':
+        if type_visualisation == 'nombre_accidents':
+            return generate_map_accidents_html()
+        else:
+            return generate_map_ratio_html()
     else:
-        return generate_map_ratio_html()
+        if type_visualisation == 'nombre_accidents':
+            return generate_map_accidents_html(year)
+        else:
+            return generate_map_ratio_html(year)
 
 if __name__ == '__main__':
     app.run(debug=True)

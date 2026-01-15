@@ -12,8 +12,8 @@ base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 geo_json_data = os.path.join(base_dir, 'Data/geojson/departements.geojson')
 
 
-def generate_map_accidents_html():
-    accidents_data = pandas.read_csv(os.path.join(base_dir, 'Data/2023/caract-2023.csv'), sep=';')
+def generate_map_accidents_html(year):
+    accidents_data = pandas.read_csv(os.path.join(base_dir, f'Data/{year}/caracteristiques-{year}.csv'), sep=';')
     accident_by_department = accidents_data.groupby('dep').size().reset_index(name='nb_accidents')
     
     accident_by_department.to_csv(os.path.join(base_dir, 'Data/2023/data-store/accidents_par_departement.csv'), sep=';', index=False, encoding='utf-8')
@@ -65,8 +65,8 @@ def generate_map_accidents_html():
     
     return map._repr_html_()
 
-def generate_map_ratio_html():
-    accidents_data = pandas.read_csv(os.path.join(base_dir, 'Data/2023/caract-2023.csv'), sep=';')
+def generate_map_ratio_html(year):
+    accidents_data = pandas.read_csv(os.path.join(base_dir, f'Data/{year}/caracteristiques-{year}.csv'), sep=';')
     accident_by_department = accidents_data.groupby('dep').size().reset_index(name='nb_accidents')
     
     population_data = pandas.read_csv(os.path.join(base_dir, 'Data/population/donnees_departements.csv'), sep=';')

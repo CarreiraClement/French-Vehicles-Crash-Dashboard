@@ -190,7 +190,6 @@ def update_nombre_accidents(dep_filter):
     if dep_filter != 'all':
         dc = dc[dc['dep'] == dep_filter]
     dc = create_age_staircase(dc)
-    print(dc)
 
     fig = px.bar(
         dc,

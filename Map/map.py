@@ -49,8 +49,8 @@ def generate_map_accidents_html(year=None):
 
     map_obj = folium.Map(
         location=coords,
-        tiles=JAWG_TILES,
-        attr=JAWG_ATTR,
+        tiles=tiles,
+        attr=attr,
         zoom_start=5.4
     )
 
@@ -111,8 +111,8 @@ def generate_map_ratio_html(year=None):
     if accidents_data.empty:
         map_accidents_ratio = folium.Map(
             location=coords,
-            tiles=JAWG_TILES,
-            attr=JAWG_ATTR,
+            tiles=tiles,
+            attr=attr,
             zoom_start=5.4
         )
         return map_accidents_ratio._repr_html_()

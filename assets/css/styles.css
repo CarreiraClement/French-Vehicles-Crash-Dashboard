@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+:root {
+    --soft-linen: #f5f0e6ff;
+    --vintage-berry: #922d50ff;
+    --crimson-violet: #501537ff;
+    --midnight-violet: #3c1b43ff;
+    --vibrant-coral: #f87060ff;
+}
+
+body {
+    background-color: var(--soft-linen);
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--midnight-violet);
+}
+
+.metric-card {
+    background-color: var(--soft-linen);
+    box-shadow: 0 2px 6px rgba(60, 27, 67, 0.08);
+    border: 1px solid rgba(60, 27, 67, 0.06);
+}
+
+.metric-value {
+    min-height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 220px;
+    padding: 20px;
+    background-color: var(--midnight-violet);
+    color: var(--soft-linen);
+}
+
+.sidebar-title {
+    font-size: 1.4rem;
+    color: var(--soft-linen);
+    margin-bottom: 10px;
+}
+
+.content {
+    margin-left: 240px; 
+    padding: 20px 30px;
+}
+
+.year-slider .rc-slider-rail {
+    background-color: rgba(60, 27, 67, 0.15); 
+    height: 6px;
+}
+
+.year-slider .rc-slider-track {
+    background-color: var(--vibrant-coral);
+    height: 6px;
+}
+
+.year-slider .rc-slider-handle {
+    border-color: var(--vibrant-coral);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(248, 112, 96, 0.2);
+    width: 16px;
+    height: 16px;
+    margin-top: -6px;
+}
+
+.year-slider .rc-slider-handle:focus,
+.year-slider .rc-slider-handle:hover {
+    box-shadow: 0 0 0 6px rgba(248, 112, 96, 0.3);
+}
+

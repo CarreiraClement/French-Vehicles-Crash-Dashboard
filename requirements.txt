@@ -3,3 +3,4 @@ pandas
 dash-ag-grid
 folium
 geopandas
+dash-bootstrap-components

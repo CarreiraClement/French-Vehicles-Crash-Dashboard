@@ -8,7 +8,7 @@ sidebar = html.Div(
         html.Hr(),
         dbc.Nav(
             [
-                dbc.NavLink("Home", href="/", active="exact", id="nav-home"),
+                dbc.NavLink("Accueil", href="/", active="exact", id="nav-home"),
                 dbc.NavLink("Usagers", href="/usagers", active="exact", id="nav-usagers"),
                 dbc.NavLink("Véhicules", href="/vehicules", active="exact", id="nav-vehicules"),
                 dbc.NavLink("Carte accidents", href="/carte-accidents", active="exact", id="nav-carte-accidents"),

@@ -1,11 +1,16 @@
 from dash import html, dcc
 
-from data_utils import load_accidents_data
+from data_utils import load_accidents_data, load_departement_names
 
 
 def home_layout():
-    # Charger les données pour le dropdown des départements
     accidents = load_accidents_data(2023)
+    dep_names = load_departement_names()
+
+    def dep_label(dep):
+        s = str(dep).strip()
+        code = s.zfill(2) if s.isdigit() else s
+        return dep_names.get(code, dep_names.get(s, f"Département {dep}"))
 
     return html.Div([
         html.H1(
@@ -136,8 +141,8 @@ def home_layout():
                 html.Label("Filtre par département:", style={'fontWeight': 'bold', 'marginRight': '10px'}),
                 dcc.Dropdown(
                     id='departement-filter',
-                    options=[{'label': f"Département {dep}", 'value': dep}
-                             for dep in sorted(accidents['dep'].unique())] + [{'label': 'Tous', 'value': 'all'}],
+                    options=[{'label': dep_label(dep), 'value': dep}
+                             for dep in sorted(accidents['dep'].unique(), key=lambda x: (str(x).zfill(2) if str(x).isdigit() else str(x)))] + [{'label': 'Tous', 'value': 'all'}],
                     value='all',
                     style={'width': '200px'}
                 )

@@ -34,14 +34,53 @@ body {
     bottom: 0;
     width: 220px;
     padding: 20px;
-    background-color: var(--midnight-violet);
+    background: linear-gradient(180deg, var(--midnight-violet) 0%, var(--crimson-violet) 100%);
     color: var(--soft-linen);
+    box-shadow: 4px 0 12px rgba(60, 27, 67, 0.2);
 }
 
 .sidebar-title {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
+    font-weight: 600;
     color: var(--soft-linen);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    line-height: 1.35;
+}
+
+.sidebar hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(90deg, var(--vibrant-coral) 0%, transparent 100%);
+    opacity: 0.8;
+    margin: 16px 0 20px 0;
+}
+
+.sidebar .nav {
+    gap: 4px;
+}
+
+.sidebar .nav-pills .nav-link {
+    color: rgba(245, 240, 230, 0.9);
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 10px 14px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar .nav-pills .nav-link:hover {
+    color: var(--soft-linen);
+    background-color: rgba(248, 112, 96, 0.25);
+}
+
+.sidebar .nav-pills .nav-link.active {
+    color: var(--soft-linen);
+    background-color: var(--vibrant-coral);
+    border: none;
+}
+
+.sidebar .nav-pills .nav-link.active:hover {
+    background-color: var(--vintage-berry);
+    color: var(--soft-linen);
 }
 
 .content {

@@ -1,13 +1,29 @@
 import folium
 import pandas
 import json
+import html as html_module
 import numpy as np
 from branca.colormap import linear
 import copy
 
 import os
 
-from data_utils import load_accidents_all_years
+from data_utils import (
+    load_accidents_all_years,
+    load_accidents_data,
+    load_usagers_all_years,
+    load_usagers_data,
+)
+from config import grav_dict
+
+
+GRAV_COLORS = {
+    2: '#501537',   
+    3: '#f87060',   
+    4: '#922d50',   
+    1: '#3c1b43',   
+    0: '#cccccc',  
+}
 
 coords = (43.25089, 2.43844)
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -204,3 +220,116 @@ def generate_map_ratio_html(year=None):
 
     return map_accidents_ratio._repr_html_()
 
+
+def generate_map_points_accidents_html(year=None, dep_filter='all', max_points=10000):
+    """
+    Génère la carte des accidents en points, colorés par gravité (pire issue par accident).
+    year: None ou "total" = toutes années, sinon 2020, 2021, 2022, 2023
+    dep_filter: "all" ou code département
+    max_points: nombre max de points affichés
+    """
+    if year is None or year == "total" or year == 0:
+        accidents_data = load_accidents_all_years()
+        usagers_data = load_usagers_all_years()
+    else:
+        accidents_data = load_accidents_data(year)
+        usagers_data = load_usagers_data(year)
+
+    if accidents_data.empty or usagers_data.empty:
+        map_obj = folium.Map(
+            location=coords,
+            tiles=tiles,
+            attr=attr,
+            zoom_start=6
+        )
+        return map_obj._repr_html_()
+
+
+    usagers_grav = usagers_data[['Num_Acc', 'grav']].copy()
+    usagers_grav['grav'] = pandas.to_numeric(usagers_grav['grav'], errors='coerce').fillna(0).astype(int)
+    usagers_grav['grav'] = usagers_grav['grav'].replace(0, 5)
+    worst_grav = usagers_grav.groupby('Num_Acc')['grav'].min()
+    worst_grav = worst_grav.replace(5, 0)
+
+    accidents_with_grav = accidents_data.merge(
+        worst_grav.rename('grav_accident'),
+        on='Num_Acc',
+        how='left'
+    )
+    accidents_with_grav['grav_accident'] = accidents_with_grav['grav_accident'].fillna(0).astype(int)
+
+    if dep_filter != 'all':
+        dep_str = str(dep_filter).strip()
+        accidents_with_grav = accidents_with_grav[
+            accidents_with_grav['dep'].astype(str).str.strip() == dep_str
+        ]
+
+
+    for col in ['lat', 'long']:
+        if col in accidents_with_grav.columns:
+            accidents_with_grav[col] = pandas.to_numeric(
+                accidents_with_grav[col].astype(str).str.replace(',', '.', regex=False),
+                errors='coerce'
+            )
+
+    points = accidents_with_grav.dropna(subset=['lat', 'long']).copy()
+    points = points[(points['lat'] >= -90) & (points['lat'] <= 90) &
+                    (points['long'] >= -180) & (points['long'] <= 180)]
+
+    if points.empty:
+        map_obj = folium.Map(
+            location=coords,
+            tiles=tiles,
+            attr=attr,
+            zoom_start=6
+        )
+        return map_obj._repr_html_()
+
+    if len(points) > max_points:
+        points = points.sample(n=max_points, random_state=42)
+
+    map_obj = folium.Map(
+        location=coords,
+        tiles=tiles,
+        attr=attr,
+        zoom_start=5.4
+    )
+
+    for _, row in points.iterrows():
+        grav = int(row['grav_accident'])
+        color = GRAV_COLORS.get(grav, GRAV_COLORS[0])
+        grav_label = grav_dict.get(grav, 'Non renseigné')
+        try:
+            j, m, a = row.get('jour'), row.get('mois'), row.get('an')
+            if pandas.notna(j) and pandas.notna(m) and pandas.notna(a):
+                date_str = f"{int(float(j)):02d}/{int(float(m)):02d}/{int(float(a))}"
+            else:
+                date_str = "—"
+        except (TypeError, ValueError):
+            date_str = "—"
+        heure = row.get('hrmn', '') if pandas.notna(row.get('hrmn')) else "—"
+        dep = row.get('dep', '') if pandas.notna(row.get('dep')) else "—"
+        adr_raw = row.get('adr', '')
+        adr = html_module.escape(str(adr_raw).strip()) if pandas.notna(adr_raw) and str(adr_raw).strip() else ""
+        popup_lines = [
+            f"<b>Date</b> : {date_str}",
+            f"<b>Heure</b> : {html_module.escape(str(heure))}",
+            f"<b>Département</b> : {html_module.escape(str(dep))}",
+            f"<b>Gravité</b> : {html_module.escape(grav_label)}",
+        ]
+        if adr:
+            popup_lines.append(f"<b>Lieu</b> : {adr}")
+        popup_html = "<br>".join(popup_lines)
+        popup = folium.Popup(popup_html, max_width=280, min_width=200)
+        folium.CircleMarker(
+            location=[row['lat'], row['long']],
+            radius=4,
+            color=color,
+            fill=True,
+            fillColor=color,
+            fillOpacity=0.8,
+            weight=2,
+            popup=popup,
+        ).add_to(map_obj)
+
+    return map_obj._repr_html_()

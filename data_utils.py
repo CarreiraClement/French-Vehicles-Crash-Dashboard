@@ -3,7 +3,6 @@ import pandas as pd
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Cache pour les données
 _cache = {}
 
 
@@ -150,6 +149,27 @@ def load_accidents_population_ratio():
     if os.path.exists(file_path):
         return pd.read_csv(file_path, sep=';', low_memory=False)
     return pd.DataFrame()
+
+
+def load_departement_names():
+    """Retourne un dictionnaire code département -> nom département"""
+    cache_key = 'departement_names'
+    if cache_key in _cache:
+        return _cache[cache_key]
+    file_path = os.path.join(BASE_DIR, 'Data/population/donnees_departements.csv')
+    if not os.path.exists(file_path):
+        _cache[cache_key] = {}
+        return _cache[cache_key]
+    df = pd.read_csv(file_path, sep=';', low_memory=False)
+    dep_names = {}
+    for _, row in df.iterrows():
+        code = str(row['DEP']).strip()
+        name = str(row['Département']).strip()
+        dep_names[code] = name
+        if code.isdigit():
+            dep_names[str(int(code))] = name
+    _cache[cache_key] = dep_names
+    return dep_names
 
 
 
